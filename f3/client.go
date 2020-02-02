@@ -7,15 +7,15 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 // Client for the Form3 API.
 type Client struct {
-	baseURL   *url.URL
-	userAgent string
-
-	accessKey       string
-	secretAccessKey string
+	baseURL        *url.URL
+	servicePathURL string
+	pagination     string
+	userAgent      string
 
 	httpClient *http.Client
 }
@@ -47,17 +47,17 @@ func WithBaseURL(rawurl string) func(*Client) {
 	}
 }
 
-// WithAccessKey sets the Client access key for authentication.
-func WithAccessKey(key string) func(*Client) {
+// WithServicePath sets the service path in the url.
+func WithServicePath(serviceUrlPath string) func(*Client) {
 	return func(c *Client) {
-		c.accessKey = key
+		c.servicePathURL = serviceUrlPath
 	}
 }
 
-// WithSecretAccessKey sets the Client secret access key for authentication.
-func WithSecretAccessKey(key string) func(*Client) {
+// WithPagination page number and page size used in Pagination
+func WithPagination(pageNumber int, pageSize int) func(*Client) {
 	return func(c *Client) {
-		c.secretAccessKey = key
+		c.pagination = "?page[number]=" + strconv.Itoa(pageNumber) + "&page[size]=" + strconv.Itoa(pageSize)
 	}
 }
 
@@ -89,8 +89,6 @@ func (c *Client) newRequest(method, path string, body interface{}) (*http.Reques
 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", c.userAgent)
-	req.Header.Set("Serialized-Access-Key", c.accessKey)
-	req.Header.Set("Serialized-Secret-Access-Key", c.secretAccessKey)
 
 	return req, nil
 }

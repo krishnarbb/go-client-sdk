@@ -6,20 +6,48 @@
             "organisation_id": "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
             "version": 0,
             "attributes": {
+                "country": "GB",
+                "base_currency": "GBP",
                 "account_number": "41426819",
                 "bank_id": "400300",
-                "bank_id_code": "GBDSC"
+                "bank_id_code": "GBDSC",
+                "bic": "NWBKGB22",
+                "iban": "GB11NWBK40030041426819",
+                "title": "Ms",
+                "first_name": "Samantha",
+                "bank_account_name": "Samantha Holder",
+                "alternative_bank_account_names": [
+                    "Sam Holder"
+                ],
+                "account_classification": "Personal",
+                "joint_account": false,
+                "account_matching_opt_out": false,
+                "secondary_identification": "A1B2C3D4"
             }
         },
         {
             "type": "accounts",
-            "id": "ea6239c1-99e9-42b3-bca1-92f5c068da6b",
+            "id": "ad27e265-9605-4b4b-a0e5-3003ea9cc4da",
             "organisation_id": "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
             "version": 0,
             "attributes": {
-                "account_number": "51426819",
-                "bank_id": "200200",
-                "bank_id_code": "GBDSC"
+                "country": "GB",
+                "base_currency": "GBP",
+                "account_number": "51426829",
+                "bank_id": "400300",
+                "bank_id_code": "GBDSC",
+                "bic": "NWBKGB22",
+                "iban": "GB11NWBK40030051426829",
+                "title": "Ms",
+                "first_name": "Jack",
+                "bank_account_name": "Jack Jamie",
+                "alternative_bank_account_names": [
+                    "Jack Jamie"
+                ],
+                "account_classification": "Personal",
+                "joint_account": false,
+                "account_matching_opt_out": false,
+                "secondary_identification": "A1E2C3E4"
             }
         }
     ]

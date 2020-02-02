@@ -2,6 +2,7 @@ package f3
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -32,6 +33,7 @@ func TestListAccounts(t *testing.T) {
 	if len(r) != 2 {
 		t.Errorf("unexpected number of accounts = %d; want = %d", len(r), 2)
 	}
+
 }
 
 func TestListAccountsWithPagination(t *testing.T) {
@@ -47,9 +49,11 @@ func TestListAccountsWithPagination(t *testing.T) {
 
 	c := NewClient(
 		WithBaseURL(ts.URL),
+		WithServicePath("/v1/organisation/accounts"),
+		WithPagination(1, 1),
 	)
 
-	r, err := c.ListAccountsWithPagination(context.Background(), AccountListOptions{PageNumber: 1, PageSize: 1})
+	r, err := c.ListAccounts(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,6 +161,7 @@ func TestFetchAccount(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("got = %v; want = %v", got, want)
 	}
+	fmt.Printf("FetchAccount :: with ID %s \n", got.Data.ID)
 }
 
 func TestDeleteAccount(t *testing.T) {

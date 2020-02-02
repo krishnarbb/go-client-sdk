@@ -4,24 +4,31 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
-	form3 "f3"
+	form3 "github.com/krishnarbb/go-client-sdk/f3"
 )
 
 func main() {
 	var (
-		baseURL = "http://192.168.99.100:8080/"
+		baseURL = os.Getenv("FORM3_HOST")
 	)
 
 	client := form3.NewClient(
 		form3.WithBaseURL(baseURL),
 	)
 
+	if err := client.AccountServiceCheck(context.Background()); err != nil {
+		log.Fatal(err)
+	}
+
+	accountID := "ad27e265-9605-4b4b-a0e5-3003ea9cc4da"
+
 	// create an Account
 	r := &form3.Account{
 		Data: form3.Data{
 			Type:           "accounts",
-			ID:             "ad27e265-9605-4b4b-a0e5-3003ea9cc4da",
+			ID:             accountID,
 			OrganisationID: "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
 			Version:        0,
 			Attributes: form3.Attributes{
@@ -47,13 +54,30 @@ func main() {
 	if err := client.CreateAccount(context.Background(), r); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Printf("CreateAccount : with ID %s successful \n", accountID)
 
-	accounts, err := client.ListAccounts(context.Background())
+	if err := client.DeleteAccount(context.Background(), accountID, 0); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("DeleteAccount :: with ID %s successful \n", accountID)
+
+	// Make a paginated request for Listing accounts
+	paginationclient := form3.NewClient(
+		form3.WithBaseURL(baseURL),
+		form3.WithServicePath("/v1/organisation/accounts"),
+		form3.WithPagination(0, 1),
+	)
+	if err := paginationclient.CreateAccount(context.Background(), r); err != nil {
+		log.Fatal(err)
+	}
+
+	accounts, err := paginationclient.ListAccounts(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, account := range accounts {
-		fmt.Printf("ListAccount :: with ID %s \n", account.Data.ID)
+	fmt.Printf("ListAccount :: %d accounts returned\n", len(accounts))
+	
+	if err := paginationclient.DeleteAccount(context.Background(), accountID, 0); err != nil {
+		log.Fatal(err)
 	}
-
 }

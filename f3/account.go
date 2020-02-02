@@ -3,6 +3,7 @@ package f3
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -40,12 +41,6 @@ type Data struct {
 	Attributes     Attributes `json:"attributes"`
 }
 
-// AccountListOptions is used for pagination
-type AccountListOptions struct {
-	PageNumber int `url:"page_number"`
-	PageSize   int `url:"page_size"`
-}
-
 // CreateAccount registers a new Account in Form3.
 func (c *Client) CreateAccount(ctx context.Context, account *Account) error {
 	req, err := c.newRequest("POST", "/v1/organisation/accounts", account)
@@ -54,7 +49,9 @@ func (c *Client) CreateAccount(ctx context.Context, account *Account) error {
 	}
 
 	resp, err := c.do(ctx, req, nil)
-	if resp.StatusCode != http.StatusCreated {
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		log.Println("CreateAccount :: Successful")
+	} else {
 		return fmt.Errorf("CreateAccount :: unexpected status code: %d", resp.StatusCode)
 	}
 
@@ -73,7 +70,9 @@ func (c *Client) DeleteAccount(ctx context.Context, accountID string, version in
 		return err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		log.Println("DeleteAccount :: Successful")
+	} else {
 		return fmt.Errorf("DeleteAccount :: unexpected status code: %d", resp.StatusCode)
 	}
 
@@ -82,7 +81,7 @@ func (c *Client) DeleteAccount(ctx context.Context, accountID string, version in
 
 // FetchAccount returns an account with a given accountID.
 func (c *Client) FetchAccount(ctx context.Context, accountID string) (*Account, error) {
-	req, err := c.newRequest("GET", "/v1/organisation/accounts"+accountID, nil)
+	req, err := c.newRequest("GET", "/v1/organisation/accounts/"+accountID, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -93,36 +92,21 @@ func (c *Client) FetchAccount(ctx context.Context, accountID string) (*Account, 
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+		log.Println("FetchAccount :: Successful")
+	} else {
 		return nil, fmt.Errorf("FetchAccount :: unexpected status code: %d", resp.StatusCode)
 	}
 
 	return r, nil
 }
 
-// ListAccounts returns all accounts.
+// ListAccounts returns accounts listing. If pagination is requested, only the requested accounts are returned.
 func (c *Client) ListAccounts(ctx context.Context) ([]*Account, error) {
-	req, err := c.newRequest("GET", "/v1/organisation/accounts", nil)
-	if err != nil {
-		return nil, err
+	u := c.servicePathURL
+	if c.pagination != "" {
+		u = c.servicePathURL + c.pagination
 	}
-
-	var response struct {
-		Accounts []*Account `json:"data"`
-	}
-
-	resp, err := c.do(ctx, req, &response)
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("ListAccounts :: unexpected status code: %d", resp.StatusCode)
-	}
-
-	return response.Accounts, err
-}
-
-// ListAccountsWithPagination returns paginated accounts listing
-func (c *Client) ListAccountsWithPagination(ctx context.Context, opts AccountListOptions) ([]*Account, error) {
-
-	u := "/v1/organisation/accounts" + "?page[number]=" + strconv.Itoa(opts.PageNumber) + "&page[size]=" + strconv.Itoa(opts.PageSize)
 
 	req, err := c.newRequest("GET", u, nil)
 	if err != nil {
@@ -136,4 +120,23 @@ func (c *Client) ListAccountsWithPagination(ctx context.Context, opts AccountLis
 	_, err = c.do(ctx, req, &response)
 
 	return response.Accounts, err
+}
+
+// AccountServiceCheck waits till Account service is available
+func (c *Client) AccountServiceCheck(ctx context.Context) error {
+	req, err := c.newRequest("GET", "/v1/health", nil)
+	if err != nil {
+		return err
+	}
+
+	serviceAvailable := false
+	for serviceAvailable != true {
+		resp, err := c.do(ctx, req, nil)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			serviceAvailable = true
+			break
+		}
+		log.Print("Waiting for Account service to be available")
+	}
+	return err
 }
