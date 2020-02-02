@@ -1,6 +1,6 @@
-# Form3.tech Go client
+# Go client for accessing a public API
 
-Provides access to the [form3.tech/](https://api.form3.tech) Account service REST API.
+Provides access to a public Account service REST API of a financial company.
 
 ## Installation
 
@@ -13,7 +13,7 @@ go get github.com/krishnarbb/go-client-sdk
 ```
 docker-compose up
 
-The above command should start the Form3 Account service API and also run the 
+The above command should start a Mock Account service API and also run the 
 go-client-sdk.
 
 To run the client manually, 
